@@ -157,6 +157,24 @@
 	}
 
 	function onkeydown(event) {
+		const $currentWord = $paragraph.querySelector('x-word.active');
+		const $currentLetter = $currentWord.querySelector('x-letter.active');
+
+		const { key } = event
+		if(key === ' ') {
+			event.preventDefault();
+
+			const $nextWord = $currentWord.nextElementSibling
+			const $nextLetter = $nextWord.querySelector('x-letter')
+
+			$currentWord.classList.remove('active')
+			$currentLetter.classList.remove('active')
+			$nextWord.classList.add('active')
+			$nextLetter.classList.add('active')
+
+			$input.value = ''
+			$input.maxLength = 0
+		}
 
 	}
 
