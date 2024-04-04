@@ -10,13 +10,15 @@
 			--green: #00b755;
 			--yellow: #daaf38;
 			--red: #ca4754;
-			--black: #222;
+			--black: #323437;
 			--gray: #999;
+			--white: #d1d0c5;
 		}
 
 		body {
 			background-color: var(--black);
 			font-family: Menlo, monospace;
+			font-size: 1.5rem;
 			display: grid;
 			padding: 32px;
 			justify-content: center;
@@ -28,7 +30,7 @@
 			display: flex;
 			flex-direction: column;
 			gap: 4px;
-			max-width: 500px;
+			max-width: 70vh;
 		}
 
 		time {
@@ -57,10 +59,23 @@
 			&.active::before {
 				content: '|';
 				color: var(--yellow);
-				font-size: 14px;
+				font-size: 1.6rem;
 				position: absolute;
 				left: -65%;
-				animation: 1s blink infinite ease-in-out;
+				top: -10%;
+				animation: 1.1s blink infinite ease-in-out;
+			}
+
+			&.active.is-last::before {
+				left: 65%;
+			}
+
+			&.correct {
+				color: var(--whitet);
+			}
+
+			&.incorrect {
+				color: var(--red);
 			}
 		}
 
@@ -93,7 +108,7 @@
 
 	const INITIAL_TIME = 30;
 
-	const TEXT = `The quick brown fox jumps over the lazy dog. 
+	const TEXT = `the quick brown fox jumps over the lazy dog. 
 		It is a truth universally acknowledged, that a single man 
 		in possession of a good fortune, must be in want of a wife.`;
 
@@ -141,12 +156,40 @@
 		$input.addEventListener('keyup', onkeyup);
 	}
 
-	function onkeydown(e) {
-		e.preventDefault();
+	function onkeydown(event) {
+
 	}
 
-	function onkeyup(e) {
-		e.preventDefault();
+	function onkeyup() {
+		const $currentWord = $paragraph.querySelector('x-word.active');
+		const $currentLetter = $currentWord.querySelector('x-letter.active');
+	
+		const currentWord = $currentWord.innerText.trim();
+		$input.maxLength = currentWord.length;
+		console.log({input: $input.value, currentWord})
+
+		const $allLetters = $currentWord.querySelectorAll('x-letter')
+		$allLetters.forEach($letter => $letter.classList.remove('correct', 'incorrect'))
+
+		$input.value.split('').forEach((char, index) => {
+			const $letter = $allLetters[index]
+			const letterToCheck = currentWord[index]
+		
+			const isCorrect = char === letterToCheck
+			const letterClass = isCorrect ? 'correct' : 'incorrect'
+			$letter.classList.add(letterClass)
+		})
+
+		$currentLetter.classList.remove('active', 'is-last')
+		const intputLength = $input.value.length
+
+		const $nextActiveLetter = $allLetters[intputLength]
+
+		if($nextActiveLetter) {
+			$nextActiveLetter.classList.add('active')
+		} else {
+			$currentLetter.classList.add('active', 'is-last')
+		}
 	}
 
 	function gameOver() {
