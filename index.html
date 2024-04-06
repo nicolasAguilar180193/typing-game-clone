@@ -99,6 +99,14 @@
 			}
 		}
 
+		#game {
+			display: flex;
+		}
+
+		#result {
+			display: none;
+		}
+
 	</style>
 </head>
 <body>
@@ -108,17 +116,20 @@
 			<p></p>
 			<input autofocus>
 		</section>
+		<section id="result">
+			<h2>wpm</h2>
+		</section>
 	</main>
 </body>
 
-<script>
+<script type="module">
+	import { words as INITIAL_WORDS } from './data.js'
+
 	const $time = document.querySelector('time')
 	const $paragraph = document.querySelector('p')
 	const $input = document.querySelector('input')
 
 	const INITIAL_TIME = 30
-
-	const TEXT = 'the quick brown fox jumps over the lazy dog it is a truth universally acknowledged that a single man in possession of a good fortune must be in want of a wife'
 
 	let words = []
 	let currentTime = INITIAL_TIME
@@ -127,7 +138,9 @@
 	initEvent()
 
 	function initGame() {
-		words = TEXT.split(' ').slice(0, 32)
+		words = INITIAL_WORDS.toSorted(
+			() => Math.random() - 0.5
+		).slice(0, 50)
 		currentTime = INITIAL_TIME
 
 		$time.textContent = INITIAL_TIME
