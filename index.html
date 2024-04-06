@@ -107,6 +107,19 @@
 			display: none;
 		}
 
+		h2 {
+			font-weight: 400;
+			opacity: .4;
+			margin: 0;
+			font-size: 16px;
+		}
+
+		h3 {
+			font-weight: 400;
+			margin: 0;
+			font-size: 24px;
+			color: var(--yellow);
+		}
 	</style>
 </head>
 <body>
@@ -118,6 +131,10 @@
 		</section>
 		<section id="result">
 			<h2>wpm</h2>
+			<h3></h3>
+
+			<h2>accuracy</h2>
+			<h3></h3>
 		</section>
 	</main>
 </body>
@@ -128,8 +145,12 @@
 	const $time = document.querySelector('time')
 	const $paragraph = document.querySelector('p')
 	const $input = document.querySelector('input')
+	const $game = document.querySelector('#game')
+	const $result = document.querySelector('#result')
+	const $wpm = $result.querySelector('h3')
+	const $accuracy = $result.querySelector('h3:last-child')
 
-	const INITIAL_TIME = 30
+	const INITIAL_TIME = 10
 
 	let words = []
 	let currentTime = INITIAL_TIME
@@ -192,7 +213,14 @@
 			$nextLetter.classList.add('active')
 
 			$input.value = ''
-			$input.maxLength = 0
+
+			const hasMissedLetters = $currentWord
+				.querySelectorAll('letter:not(.correct)').length > 0
+
+			const classToAdd = hasMissedLetters ? 'marked' : 'correct'
+			$currentWord.classList.add(classToAdd)
+
+			return
 		}
 
 		if(key === 'Backspace') {
@@ -256,7 +284,21 @@
 	}
 
 	function gameOver() {
-		console.log('game over')
+		$game.style.display = 'none'
+		$result.style.display = 'flex'
+
+		const correctWords = $paragraph.querySelectorAll('x-word.correct').length
+		console.log('correctWords')
+		console.log(correctWords)
+		const correctLetters = $paragraph.querySelectorAll('x-letter.correct').length
+		const incorrectLetters = $paragraph.querySelectorAll('x-letter.incorrect').length
+		const totalLetters = correctLetters + incorrectLetters
+		const accuracy = totalLetters > 0 ? (correctLetters / totalLetters) * 100 : 0
+
+		const wpm = correctWords * 60 / INITIAL_TIME
+		console.log(wpm)
+		$wpm.textContent = wpm
+		$accuracy.textContent = `${accuracy.toFixed(2)}%`
 	}
 
 	function updateTime() {
