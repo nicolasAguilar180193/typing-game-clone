@@ -120,6 +120,24 @@
 			font-size: 24px;
 			color: var(--yellow);
 		}
+
+		button {
+			background: transparent;
+			border: 0;
+			margin-top: 32px;
+			padding: 8px;
+			opacity: .4;
+			display: inline-block;
+			transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+			cursor: pointer;
+			border-radius: 16px;
+
+			&:hover {
+			background: #444;
+			opacity: 1;
+			scale: 110%;
+		}
+	}
 	</style>
 </head>
 <body>
@@ -129,12 +147,21 @@
 			<p></p>
 			<input autofocus>
 		</section>
-		<section id="result">
+		<section id="results">
 			<h2>wpm</h2>
-			<h3></h3>
+			<h3 id="results-wpm"></h3>
 
 			<h2>accuracy</h2>
-			<h3></h3>
+			<h3 id="results-accuracy"></h3>
+
+			<button id="reload-button">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+				  stroke-linecap="round" stroke-linejoin="round">
+				  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+				  <path d="M19.933 13.041a8 8 0 1 1 -9.925 -8.788c3.899 -1 7.935 1.007 9.425 4.747" />
+				  <path d="M20 4v5h-5" />
+				</svg>
+			</button>
 		</section>
 	</main>
 </body>
@@ -146,19 +173,27 @@
 	const $paragraph = document.querySelector('p')
 	const $input = document.querySelector('input')
 	const $game = document.querySelector('#game')
-	const $result = document.querySelector('#result')
-	const $wpm = $result.querySelector('h3')
-	const $accuracy = $result.querySelector('h3:last-child')
+	const $results = document.querySelector('#results')
+	const $wpm = $results.querySelector('#results-wpm')
+    const $accuracy = $results.querySelector('#results-accuracy')
+	const $reloadButton = $results.querySelector('#reload-button')
 
-	const INITIAL_TIME = 10
+	const INITIAL_TIME = 20
 
 	let words = []
 	let currentTime = INITIAL_TIME
+	let playing
 
 	initGame()
-	initEvent()
+	initEvents()
 
 	function initGame() {
+		$game.style.display = 'flex'
+		$results.style.display = 'none'
+		$input.value = ''
+
+		playing = false
+
 		words = INITIAL_WORDS.toSorted(
 			() => Math.random() - 0.5
 		).slice(0, 50)
@@ -175,20 +210,33 @@
 				</x-word>
 			`
 		}).join('')
+		
+		const $firstWord = $paragraph.querySelector('x-word')
+		$firstWord.classList.add('active')
+		$firstWord.querySelector('x-letter').classList.add('active')
 	}
 
-	const $firstWord = $paragraph.querySelector('x-word')
-	$firstWord.classList.add('active')
-	$firstWord.querySelector('x-letter').classList.add('active')
-
-	const intervalId = setInterval(updateTime, 1000)
-
-	function initEvent() {
+	
+	function initEvents() {
 		document.addEventListener('keydown', () => {
 			$input.focus()
+			if (!playing) {
+				playing = true
+				const intervalId = setInterval(() => {
+					currentTime--
+					$time.textContent = currentTime
+
+					if (currentTime === 0) {
+						clearInterval(intervalId)
+						gameOver()
+					}
+				}, 1000)
+			}
 		})
+		
 		$input.addEventListener('keydown', onKeyDown)
 		$input.addEventListener('keyup', onKeyUp)
+		$reloadButton.addEventListener('click', initGame)
 	}
 
 	function onKeyDown(event) {
@@ -285,29 +333,18 @@
 
 	function gameOver() {
 		$game.style.display = 'none'
-		$result.style.display = 'flex'
+		$results.style.display = 'flex'
 
 		const correctWords = $paragraph.querySelectorAll('x-word.correct').length
-		console.log('correctWords')
-		console.log(correctWords)
 		const correctLetters = $paragraph.querySelectorAll('x-letter.correct').length
 		const incorrectLetters = $paragraph.querySelectorAll('x-letter.incorrect').length
 		const totalLetters = correctLetters + incorrectLetters
 		const accuracy = totalLetters > 0 ? (correctLetters / totalLetters) * 100 : 0
-
 		const wpm = correctWords * 60 / INITIAL_TIME
-		console.log(wpm)
+
 		$wpm.textContent = wpm
 		$accuracy.textContent = `${accuracy.toFixed(2)}%`
 	}
 
-	function updateTime() {
-		currentTime -= 1
-		$time.textContent = currentTime
-		if (currentTime === 0) {
-			clearInterval(intervalId)
-			gameOver()
-		}
-	}
 </script>
 </html>
