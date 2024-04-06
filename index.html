@@ -43,6 +43,8 @@
 			top: 0;
 			left: 0;
 			pointer-events: none;
+			opacity: 0;
+			user-select: none;
 		}
 
 		p {
@@ -71,7 +73,7 @@
 			}
 
 			&.correct {
-				color: var(--whitet);
+				color: var(--white);
 			}
 
 			&.incorrect {
@@ -110,25 +112,25 @@
 </body>
 
 <script>
-	const $time = document.querySelector('time');
-	const $paragraph = document.querySelector('p');
-	const $input = document.querySelector('input');
+	const $time = document.querySelector('time')
+	const $paragraph = document.querySelector('p')
+	const $input = document.querySelector('input')
 
-	const INITIAL_TIME = 30;
+	const INITIAL_TIME = 30
 
-	const TEXT = 'the quick brown fox jumps over the lazy dog it is a truth universally acknowledged that a single man in possession of a good fortune must be in want of a wife';
+	const TEXT = 'the quick brown fox jumps over the lazy dog it is a truth universally acknowledged that a single man in possession of a good fortune must be in want of a wife'
 
-	let words = [];
-	let currentTime = INITIAL_TIME;
+	let words = []
+	let currentTime = INITIAL_TIME
 
-	initGame();
-	initEvent();
+	initGame()
+	initEvent()
 
 	function initGame() {
 		words = TEXT.split(' ').slice(0, 32)
-		currentTime = INITIAL_TIME;
+		currentTime = INITIAL_TIME
 
-		$time.textContent = INITIAL_TIME;
+		$time.textContent = INITIAL_TIME
 
 		$paragraph.innerHTML = words.map((word, index) => {
 			const letters = word.split('')
@@ -137,42 +139,34 @@
 				<x-word>
 					${letters.map(letter => `<x-letter>${letter}</x-letter>`).join('')}
 				</x-word>
-			`;	
-		}).join('');
+			`
+		}).join('')
 	}
 
 	const $firstWord = $paragraph.querySelector('x-word')
 	$firstWord.classList.add('active')
 	$firstWord.querySelector('x-letter').classList.add('active')
 
-	const intervalId = setInterval(() => {
-		currentTime -= 1;
-		$time.textContent = currentTime;
-		if (currentTime === 0) {
-			clearInterval(intervalId);
-			gameOver()
-		}
-	}, 1000);
+	const intervalId = setInterval(updateTime, 1000)
 
 	function initEvent() {
 		document.addEventListener('keydown', () => {
 			$input.focus()
-		});
-		$input.addEventListener('keydown', onKeyDown);
-		$input.addEventListener('keyup', onKeyUp);
+		})
+		$input.addEventListener('keydown', onKeyDown)
+		$input.addEventListener('keyup', onKeyUp)
 	}
 
 	function onKeyDown(event) {
-		const $currentWord = $paragraph.querySelector('x-word.active');
-		const $currentLetter = $currentWord.querySelector('x-letter.active');
+		const $currentWord = $paragraph.querySelector('x-word.active')
+		const $currentLetter = $currentWord.querySelector('x-letter.active')
 
 		const { key } = event
 
-		if(key === ' ') {
-			event.preventDefault();
+		if(key === ' ' && $currentWord && $input) {
+			event.preventDefault()
 			
 			if($currentWord.innerText !== $input.value) {
-				console.log($currentWord.innerText, $input.value)
 				$currentWord.classList.add('marked')
 			}
 
@@ -191,16 +185,16 @@
 		if(key === 'Backspace') {
 			const $prevWord = $currentWord.previousElementSibling
 			const $prevLetter = $currentLetter.previousElementSibling
-			console.log($prevWord, $prevLetter)
 
 			if(!$prevWord && !$prevLetter) {
-				event.preventDefault();
+				event.preventDefault()
 				return
 			}
 
 			const $wordMarked = $currentWord.classList.contains('x-word.marked')
+
 			if(!$prevLetter) {
-				event.preventDefault();
+				event.preventDefault()
 				$prevWord.classList.remove('marked')
 				$prevWord.classList.add('active')
 
@@ -211,19 +205,18 @@
 
 				$input.value = [
 					...$prevWord.querySelectorAll('x-letter.correct', 'x-letter.incorrect'),
-				].map(el => el.innerText)
-				.join('')
+				].map(el => el.innerText).join('')
 			}
 		}
 
 	}
 
 	function onKeyUp() {
-		const $currentWord = $paragraph.querySelector('x-word.active');
-		const $currentLetter = $currentWord.querySelector('x-letter.active');
+		const $currentWord = $paragraph.querySelector('x-word.active')
+		const $currentLetter = $currentWord.querySelector('x-letter.active')
 	
-		const currentWord = $currentWord.innerText.trim();
-		$input.maxLength = currentWord.length;
+		const currentWord = $currentWord.innerText.trim()
+		$input.maxLength = currentWord.length
 
 		const $allLetters = $currentWord.querySelectorAll('x-letter')
 		$allLetters.forEach($letter => $letter.classList.remove('correct', 'incorrect'))
@@ -250,7 +243,16 @@
 	}
 
 	function gameOver() {
-		console.log('game over');
+		console.log('game over')
+	}
+
+	function updateTime() {
+		currentTime -= 1
+		$time.textContent = currentTime
+		if (currentTime === 0) {
+			clearInterval(intervalId)
+			gameOver()
+		}
 	}
 </script>
 </html>
